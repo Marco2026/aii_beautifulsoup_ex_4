@@ -17,8 +17,8 @@ def load_data():
     conn.execute('''CREATE TABLE RESULTS (
                  LOCAL              TEXT NOT NULL,
                  VISITANTE          TEXT NOT NULL,
-                 GOLES_LOCAL        INT
-                 GOLES_VISITANTE    INT
+                 GOLES_LOCAL        INT,
+                 GOLES_VISITANTE    INT,
                  GOLES              TEXT,          
                  JORNADA            INT NOT NULL
                  );''')
