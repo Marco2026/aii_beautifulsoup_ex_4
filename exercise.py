@@ -4,33 +4,33 @@ from bs4 import BeautifulSoup
 from tkinter import messagebox
 from datetime import datetime
 
+def load_data():
+    pass
+
+def list_journeys():
+    pass
+
+def search_journey():
+    pass
+
+def statistics_journey():
+    pass
+
+def search_goals():
+    pass
+
 def root_window():
     root = Tk()
     root.geometry("400x300")
-    root.title("Beautifulsoup exercise 2")
+    root.title("Beautifulsoup exercise 4")
 
-    ## MENU BAR
+    ### BUTTONS
 
-    menubar = Menu(root)
-
-    ### DATA
-
-    datamenu = Menu(menubar, tearoff=0)
-    datamenu.add_command(label="Load", command=load_data)
-    datamenu.add_command(label="List", command=lambda: list_films(mode='COMPLETE'))
-    datamenu.add_separator()
-    datamenu.add_command(label="Exit", command=root.quit)
-    menubar.add_cascade(label="Data", menu=datamenu)
-
-    ### SEARCH
-
-    searchmenu = Menu(menubar, tearoff=0)
-    searchmenu.add_command(label="Title", command=open_title_entry_window)
-    searchmenu.add_command(label="Date", command=open_date_entry_window)
-    searchmenu.add_command(label="Genres", command=open_genres_spinbox_window)
-    menubar.add_cascade(label="Search", menu=searchmenu)
-
-    root.config(menu=menubar)
+    Button(root, text='Load Results', command=load_data).pack()
+    Button(root, text='List journeys', command=list_journeys).pack()
+    Button(root, text='Search journey', command=search_journey).pack()
+    Button(root, text='Statistics journey', command=statistics_journey).pack()
+    Button(root, text='Search goals', command=search_goals).pack()
 
     root.mainloop()
 
