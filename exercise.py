@@ -19,14 +19,15 @@ def load_data():
                  VISITANTE          TEXT NOT NULL,
                  GOLES_LOCAL        INT,
                  GOLES_VISITANTE    INT,
-                 GOLES              TEXT,          
+                 LISTA_GOLES_LOCAL              TEXT,
+                 LISTA_GOLES_VISITANTE              TEXT,          
                  JORNADA            INT NOT NULL
                  );''')
     
     matches_list = get_matches()
 
     for m in matches_list():
-        conn.execute('''INSERT INTO RESULTS VALUES (?,?,?,?,?)''',m)
+        conn.execute('''INSERT INTO RESULTS VALUES (?,?,?,?,?,?,?)''',m)
     conn.commit()
     cursor = conn.execute("SELECT COUNT(*) FROM RESULTS")
     messagebox.showinfo("Database", "Database created successfully \nThere are" + str(cursor.fetchone()[0]) + " results")
