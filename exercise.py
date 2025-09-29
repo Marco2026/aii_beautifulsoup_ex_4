@@ -32,7 +32,7 @@ def load_data():
     messagebox.showinfo("Database", "Database created successfully \nThere are" + str(cursor.fetchone()[0]) + " results")
     conn.close()
 
-def list_journeys(mode='COMPLETE', journey=0):
+def list_journeys(mode='COMPLETE', journey=0, local_team='Barcelona'):
     conn = sqlite3.connect("results.db")
     if mode == 'COMPLETE':
         journeys = list(conn.execute("SELECT * FROM RESULTS ORDER BY journey DESC"))
@@ -75,10 +75,47 @@ def search_journey():
     Button(journeys_spinbox_window, text="Accept", command=confirm).pack(pady=5)
 
 def statistics_journey():
-    pass
+    journeys_spinbox_window = Toplevel()
+    journeys_spinbox_window.title("Select journey")
+    journeys_spinbox_window.geometry("200x100")
+    
+    conn = sqlite3.connect("results.db")
+    journeys = conn.execute("SELECT COUNT(DISTINCT(JOURNEY)) FROM RESULTS").fetchone()[0]
+    conn.close()
+    
+    selected = StringVar(value=0)
+    journeys_spinbox = Spinbox(journeys_spinbox_window, from_=0, to=journeys, textvariable=selected)
+    journeys_spinbox.pack()
+
+    def confirm():
+        list_journeys(mode="STATISTICS_JOURNEY", journey=int(selected.get()))
+        journeys_spinbox_window.destroy()
+
+    Button(journeys_spinbox_window, text="Accept", command=confirm).pack(pady=5)
 
 def search_goals():
-    pass
+    journeys_spinbox_window = Toplevel()
+    journeys_spinbox_window.title("Select journey")
+    journeys_spinbox_window.geometry("200x100")
+
+    conn = sqlite3.connect("results.db")
+    journeys = conn.execute("SELECT COUNT(DISTINCT(journey)) FROM results").fetchone()[0]
+    teams = list(conn.execute("SELECT DISTINCT(local) FROM results"))
+    conn.close()
+
+    selected_journey = StringVar(value=0)
+    journey_spinbox = Spinbox(journeys_spinbox_window, from_=0, to=journeys, textvariable=selected_journey)
+    journey_spinbox.pack()
+
+    selected_team = StringVar(value=0)
+    team_spinbox = Spinbox(journeys_spinbox_window, values=teams, textvariable=selected_team)
+    team_spinbox.pack()
+
+    def confirm():
+        list_journeys(mode="STATISTICS_JOURNEY", journey=int(selected_journey.get()), local_team=selected_team.get())
+        journeys_spinbox_window.destroy()
+
+    Button(journeys_spinbox_window, text="Accept", command=confirm).pack(pady=5)
 
 def root_window():
     root = Tk()
