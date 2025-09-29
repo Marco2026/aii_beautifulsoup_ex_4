@@ -4,14 +4,53 @@ from bs4 import BeautifulSoup
 from tkinter import messagebox
 from datetime import datetime
 
+if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
+    ssl._create_default_https_context=ssl._create_unverified_context
+
 def load_data():
     pass
 
-def list_journeys():
-    pass
+def list_journeys(mode='COMPLETE', journey=0):
+    conn = sqlite3.connect("results.db")
+    if mode == 'COMPLETE':
+        journeys = list(conn.execute("SELECT * FROM RESULTS ORDER BY journey DESC"))
+    elif mode == 'SEARCH_JOURNEY':
+        query = "SELECT * FROM RESULTS WHERE journey = ?"
+        param = (journey,)
+        journeys = list(conn.execute(query, param))
+    elif mode == 'STATISTICS_JOURNEY':
+        pass
+    elif mode == 'SEARCH_GOALS':
+        pass
+
+    list_window = Toplevel()
+    list_window.title("List window")
+    list_window.geometry("800x600")
+    list_window_scrollbar = Scrollbar(list_window)
+    list_window_scrollbar.pack(side=RIGHT, fill=Y)
+    journeys_listbox = Listbox(master=list_window, width=800, height=600, yscrollcommand=list_window_scrollbar.set)
+    journeys_listbox.insert(END, *journeys)
+    journeys_listbox.pack()
+    list_window_scrollbar.config(command=journeys_listbox.yview)
 
 def search_journey():
-    pass
+    journeys_spinbox_window = Toplevel()
+    journeys_spinbox_window.title("Select journey")
+    journeys_spinbox_window.geometry("200x100")
+    
+    conn = sqlite3.connect("results.db")
+    journeys = conn.execute("SELECT COUNT(DISTINCT(JOURNEY)) FROM RESULTS").fetchone()[0]
+    conn.close()
+    
+    selected = StringVar(value=0)
+    journeys_spinbox = Spinbox(journeys_spinbox_window, from_=0, to=journeys, textvariable=selected)
+    journeys_spinbox.pack()
+
+    def confirm():
+        list_journeys(mode="SEARCH_JOURNEY", journey=int(selected.get()))
+        journeys_spinbox_window.destroy()
+
+    Button(journeys_spinbox_window, text="Accept", command=confirm).pack(pady=5)
 
 def statistics_journey():
     pass
