@@ -74,7 +74,7 @@ def load_data():
                  GOLES_VISITANTE    INT,
                  LISTA_GOLES_LOCAL              TEXT,
                  LISTA_GOLES_VISITANTE              TEXT,          
-                 JORNADA            INT NOT NULL
+                 JOURNEY            INT NOT NULL
                  );''')
     
     matches_list = get_all_matches_data("https://as.com/resultados/futbol/primera/2023_2024/calendario/")
