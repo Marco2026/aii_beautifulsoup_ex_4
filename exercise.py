@@ -4,8 +4,30 @@ from bs4 import BeautifulSoup
 from tkinter import messagebox
 from datetime import datetime
 
+def get_matches():
+    return None
+
 def load_data():
-    pass
+    conn = sqlite3.connect('results.db')
+    conn.text_factory = str
+    conn.execute("DROP TABLE IF EXIST RESULTS")
+    conn.execute('''CREATE TABLE RESULTS (
+                 LOCAL              TEXT NOT NULL,
+                 VISITANTE          TEXT NOT NULL,
+                 GOLES_LOCAL        INT
+                 GOLES_VISITANTE    INT
+                 GOLES              TEXT,          
+                 JORNADA            INT NOT NULL
+                 );''')
+    
+    matches_list = get_matches()
+
+    for m in matches_list():
+        conn.execute('''INSERT INTO RESULTS VALUES (?,?,?,?,?)''',m)
+    conn.commit()
+    cursor = conn.execute("SELECT COUNT(*) FROM RESULTS")
+    messagebox.showinfo("Database", "Database created successfully \nThere are" + str(cursor.fetchone()[0]) + " results")
+    conn.close()
 
 def list_journeys():
     pass
