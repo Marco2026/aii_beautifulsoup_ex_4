@@ -7,13 +7,66 @@ from datetime import datetime
 if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
     ssl._create_default_https_context=ssl._create_unverified_context
 
-def get_matches():
-    return None
+def get_all_matches_data(url):
+    matchdays = get_matchdays(url)
+    # print(f"Número de jornadas: {len(matchdays)}")
+    all_matches = []
+    for matchday in matchdays:
+        matches, matchday_number = get_matches(matchday)
+        # print(f"Jornada {matchday_number} - {len(matches)} partidos")
+        for match in matches:
+            match_info = get_match_info(match, matchday_number)
+            all_matches.append(match_info)
+            # print(match_info)
+    print(f"Número total de partidos: {len(all_matches)}")
+    print(f"Número de jornadas: {len(matchdays)}")
+    return all_matches
+
+
+def get_matchdays(url):
+    f = urllib.request.urlopen(url)
+    s = BeautifulSoup(f, "lxml")
+    matchdays = s.find_all("div", class_="cont-modulo resultados")
+    # print(f"Número de jornadas: {len(matchdays)}")
+    return matchdays
+
+def get_matches(matchday_div):
+    matchday_number = matchday_div.get("id").replace("jornada-","")
+    matches = matchday_div.find("table", class_="tabla-datos").find("tbody").find_all("tr")
+    # print(f"Jornada {matchday_number} - {len(matches)} partidos")
+    return matches, matchday_number
+
+def get_match_info(match, matchday_number):
+    local = match.find("td", class_="col-equipo-local").text.strip()
+    visit = match.find("td", class_="col-equipo-visitante").text.strip()
+    score = match.find("td", class_="col-resultado").text.strip().split("-")
+    local_score = score[0].strip()
+    visit_score = score[1].strip()
+    match_link = match.find("td", class_="col-resultado").find("a")['href']
+    local_goals, visit_goals = parse_goals_from_link(match_link)
+    match_info = {
+        'matchday': matchday_number,
+        'local': local,
+        'local_score': local_score,
+        'local_goals': local_goals,
+        'visit': visit,
+        'visit_score': visit_score,
+        'visit_goals': visit_goals,
+    }
+    # print(match_info)
+    return match_info
+
+def parse_goals_from_link(match_link):
+    f = urllib.request.urlopen(match_link)
+    s = BeautifulSoup(f, "lxml")    
+    local_goals = s.find("div", class_="scr-hdr__team is-local").find("div", class_="scr-hdr__scorers").text
+    visit_goals = s.find("div", class_="scr-hdr__team is-visitor").find("div", class_="scr-hdr__scorers").text
+    return local_goals, visit_goals
 
 def load_data():
     conn = sqlite3.connect('results.db')
     conn.text_factory = str
-    conn.execute("DROP TABLE IF EXIST RESULTS")
+    conn.execute("DROP TABLE IF EXISTS RESULTS")
     conn.execute('''CREATE TABLE RESULTS (
                  LOCAL              TEXT NOT NULL,
                  VISITANTE          TEXT NOT NULL,
@@ -24,10 +77,10 @@ def load_data():
                  JORNADA            INT NOT NULL
                  );''')
     
-    matches_list = get_matches()
+    matches_list = get_all_matches_data("https://as.com/resultados/futbol/primera/2023_2024/calendario/")
 
-    for m in matches_list():
-        conn.execute('''INSERT INTO RESULTS VALUES (?,?,?,?,?,?,?)''',m)
+    for m in matches_list:
+        conn.execute('''INSERT INTO RESULTS VALUES (?,?,?,?,?,?,?)''', (m['local'], m['visit'], int(m['local_score']), int(m['visit_score']), m['local_goals'], m['visit_goals'], int(m['matchday'])))
     conn.commit()
     cursor = conn.execute("SELECT COUNT(*) FROM RESULTS")
     messagebox.showinfo("Database", "Database created successfully \nThere are" + str(cursor.fetchone()[0]) + " results")
